@@ -13,7 +13,7 @@ COPY . .
 RUN cargo build --release
 
 FROM rust:slim-bookworm
-
+FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/target/release/imphnen-chat-backend ./imphnen-chat-backend
 
