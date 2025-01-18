@@ -12,6 +12,18 @@ pub struct Chat {
     time: DateTime<Utc>,
 }
 
+impl Chat {
+    fn validate(&self) -> Result<(), String> {
+        if self.name.trim().is_empty() {
+            return Err("Name must not be empty".to_string());
+        }
+        if self.message.trim().is_empty() {
+            return Err("Message must not be empty".to_string());
+        }
+        Ok(())
+    }
+}
+
 pub async fn handle_incoming_messages(
     mut stream: actix_ws::MessageStream,
     client_id: String,
@@ -21,8 +33,16 @@ pub async fn handle_incoming_messages(
     while let Some(Ok(msg)) = stream.recv().await {
         match msg {
             WsMessage::Text(text) => {
-                if let Err(err) = tx.send(text.to_string()) {
-                    eprintln!("Failed to broadcast message: {:?}", err);
+                if let Ok(chat) = serde_json::from_str::<Chat>(&text) {
+                    if let Err(err) = chat.validate() {
+                        eprintln!("Validation error: {}", err);
+                        continue;
+                    }
+                    if let Err(err) = tx.send(text.to_string()) {
+                        eprintln!("Failed to broadcast message: {:?}", err);
+                    }
+                } else {
+                    eprintln!("Failed to deserialize message");
                 }
             }
             WsMessage::Close(_reason) => {
