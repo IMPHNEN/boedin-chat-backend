@@ -1,0 +1,6 @@
+services:
+  server:
+    container_name: boedinc-server
+    build: .
+    ports:
+      - 8080:8080

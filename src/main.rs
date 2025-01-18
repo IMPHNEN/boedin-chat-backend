@@ -1,10 +1,11 @@
+use actix_web::{middleware, web, App, HttpServer};
 use std::{collections::HashMap, sync::Arc};
-
-use actix_web::{web, App, HttpServer};
 use tokio::sync::{broadcast, RwLock};
 
 mod handlers;
 mod routes;
+
+const CHANNEL_CAPACITY: usize = 1000;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -15,18 +16,26 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let (tx, _) = broadcast::channel::<String>(100);
+    let (tx, _) = broadcast::channel::<String>(CHANNEL_CAPACITY);
 
     let state = web::Data::new(AppState {
-        tx: tx.clone(),
+        tx,
         history: Arc::new(RwLock::new(Vec::new())),
         clients: Arc::new(RwLock::new(HashMap::new())),
     });
 
     println!("Server started at http://0.0.0.0:8080");
 
-    HttpServer::new(move || App::new().app_data(state.clone()).configure(routes::init))
-        .bind("0.0.0.0:8080")?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .wrap(middleware::Logger::default())
+            .wrap(middleware::Compress::default())
+            .wrap(middleware::DefaultHeaders::new().add(("X-Content-Type-Options", "nosniff")))
+            .app_data(state.clone())
+            .configure(routes::init)
+    })
+    .workers(num_cpus::get())
+    .bind("0.0.0.0:8080")?
+    .run()
+    .await
 }

@@ -17,25 +17,22 @@ pub async fn chat(
         .await
         .insert(client_id.clone(), session.clone());
 
-    let history = state.history.read().await;
-    for chat_msg in history.iter() {
-        let json = serde_json::to_string(chat_msg).unwrap();
+    for chat in state.history.read().await.iter() {
+        let json = serde_json::to_string(chat).unwrap();
         session.text(json).await.unwrap();
     }
 
-    let rx = state.tx.subscribe();
-    let tx = state.tx.clone();
-    let clients = state.clients.clone();
-    let history = state.history.clone();
-
     actix_web::rt::spawn(handlers::chat::handle_incoming_messages(
         stream,
-        client_id.clone(),
-        tx,
-        clients,
+        client_id,
+        state.tx.clone(),
+        state.clients.clone(),
     ));
+
     actix_web::rt::spawn(handlers::chat::handle_outgoing_messages(
-        rx, session, history,
+        state.tx.subscribe(),
+        session,
+        state.history.clone(),
     ));
 
     Ok(res)

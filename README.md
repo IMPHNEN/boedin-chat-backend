@@ -2,6 +2,11 @@
 
 A WebSocket-based chat server built with Rust and Actix-web framework.
 
+## TODO
+
+- Enhance error logging.
+- ~~Enhance the performance.~~
+
 ## API Endpoints
 
 ### WebSocket Connection
