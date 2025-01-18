@@ -39,7 +39,7 @@ pub async fn handle_incoming_messages(
             WsMessage::Ping(bytes) => {
                 if let Some(client) = clients.write().await.get_mut(&client_id) {
                     if let Err(err) = client.pong(&bytes).await {
-                        println!("Failed to send pong to client {}: {}", client_id, err);
+                        eprintln!("Failed to send pong to client {}: {}", client_id, err);
                         break;
                     }
                 }
@@ -50,11 +50,11 @@ pub async fn handle_incoming_messages(
                     chat.sanitize();
                     if chat.validate().is_ok() {
                         if let Err(err) = tx.send(serde_json::to_string(&chat).unwrap()) {
-                            println!("Failed to broadcast message: {:?}", err);
+                            eprintln!("Failed to broadcast message: {:?}", err);
                         }
                     }
                 }
-                Err(e) => println!("Invalid message format: {:?}", e),
+                Err(e) => eprintln!("Invalid message format: {:?}", e),
             },
             _ => {}
         }
