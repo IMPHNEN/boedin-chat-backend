@@ -30,11 +30,7 @@ async fn handle_socket(socket: ws::WebSocket, state: Arc<AppState>) {
                     for msg in &mut messages {
                         msg.time = Utc::now();
 
-                        // TODO: Don't F Touch This Code
-                        {
-                            let mut history = state_clone.history.write().await;
-                            history.push(msg.clone());
-                        }
+                        state_clone.add_message(msg.clone()).await;
 
                         if let Err(e) = state_clone.tx.clone().send(msg.clone()) {
                             error!("Failed to send message: {}", e);
@@ -47,19 +43,16 @@ async fn handle_socket(socket: ws::WebSocket, state: Arc<AppState>) {
         }
     });
 
-    // Handle broadcasting and send message history
+    // Handle broadcasting and send message history.
     let mut send_task = tokio::spawn(async move {
-        // TODO: Don't F Touch This Code
-        // Send message history to the client
-        {
-            let history = state.history.read().await;
-            let json = serde_json::to_string(&*history).unwrap();
-            if ws_tx.send(ws::Message::Text(json.into())).await.is_err() {
-                return; // Return if fails.
-            }
+        // Send message history to the client.
+        let recent_messages = state.get_recent_messages().await;
+        let json = serde_json::to_string(&recent_messages).unwrap();
+        if ws_tx.send(ws::Message::Text(json.into())).await.is_err() {
+            return;
         }
 
-        // Broadcast new messages
+        // Broadcast new messages.
         while let Ok(msg) = rx.recv().await {
             let json = serde_json::to_string(&vec![msg]).unwrap();
             if ws_tx.send(ws::Message::Text(json.into())).await.is_err() {

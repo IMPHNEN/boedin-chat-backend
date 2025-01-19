@@ -11,6 +11,7 @@ mod models;
 mod routes;
 mod state;
 
+const HISTORY_LIMIT: usize = 100;
 const CHANNEL_CAPACITY: usize = 1000;
 
 #[tokio::main]
