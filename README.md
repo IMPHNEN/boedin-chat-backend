@@ -1,11 +1,10 @@
 # IMPHNEN Chat Backend
 
-A WebSocket-based chat server built with Rust and Actix-web framework.
+A WebSocket-based chat server built with Rust.
 
-## TODO
+## READ THIS!
 
-- Enhance error logging.
-- ~~Enhance the performance.~~
+**Create New Branch** for Features/Testing and then you can merge it to the ***main*** branch after verified.
 
 ## API Endpoints
 
@@ -29,49 +28,49 @@ cargo build --release
 cargo run --release
 ```
 
-The server will start on `127.0.0.1:8080` by default.
+The server will start on `0.0.0.0:8080` by default.
 
 ## Prerequisites
 
-- Rust & Cargo (Rust Package Manager)
+- **Rust** - You can get from [here](https://www.rust-lang.org/tools/install)
 - Cargo Dependencies in `Cargo.toml`:
 
 ```
-actix-web
-actix-ws
+axum
 chrono
+futures
 serde
 serde_json
 tokio
-uuid
+tracing
+tracing-subscriber
 ```
 
 - Cargo Dependencies Features:
 
 ```
+axum/ws
 chrono/serde
 serde/derive
 tokio/full
-uuid/v4
 ```
 
 ## Project Structure
 
 ```
 src/
-  ├── handlers/
+  ├── routes/
   │   ├── chat.rs
   │   └── mod.rs
-  ├── routes/
-  │   ├── mod.rs
-  │   └── ws.rs
   └── main.rs
+  └── models.rs
+  └── state.rs
 ```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch
+2. Create your **feature** branch
 3. Commit your changes
 4. Push to the branch
 5. Create a new Pull Request

@@ -1,5 +1,4 @@
 FROM rust:slim-bookworm AS builder
-
 WORKDIR /app
 
 RUN --mount=type=bind,source=src,target=src \
@@ -12,7 +11,6 @@ RUN --mount=type=bind,source=src,target=src \
     cp ./target/release/imphnen-chat-backend /tmp/imphnen-chat-backend
 
 FROM debian:bookworm-slim
-
 WORKDIR /app
 
 COPY --from=builder /tmp/imphnen-chat-backend ./imphnen-chat-backend

@@ -1,41 +1,37 @@
-use actix_web::{middleware, web, App, HttpServer};
-use std::{collections::HashMap, sync::Arc};
-use tokio::sync::{broadcast, RwLock};
+use std::net::SocketAddr;
 
-mod handlers;
+use axum::{routing, Router};
+use tokio::net::TcpListener;
+use tracing::info;
+
+use routes::chat_ws;
+use state::AppState;
+
+mod models;
 mod routes;
+mod state;
 
 const CHANNEL_CAPACITY: usize = 1000;
 
-#[derive(Clone)]
-pub struct AppState {
-    tx: broadcast::Sender<String>,
-    history: Arc<RwLock<Vec<handlers::chat::Chat>>>,
-    clients: Arc<RwLock<HashMap<String, actix_ws::Session>>>,
-}
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt::init();
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    let (tx, _) = broadcast::channel::<String>(CHANNEL_CAPACITY);
+    let app_state = AppState::new();
 
-    let state = web::Data::new(AppState {
-        tx,
-        history: Arc::new(RwLock::new(Vec::new())),
-        clients: Arc::new(RwLock::new(HashMap::new())),
-    });
+    let app = Router::new()
+        .route("/ws", routing::any(chat_ws))
+        .with_state(app_state.clone());
 
-    println!("Server started at http://0.0.0.0:8080");
+    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
-    HttpServer::new(move || {
-        App::new()
-            .wrap(middleware::Logger::default())
-            .wrap(middleware::Compress::default())
-            .wrap(middleware::DefaultHeaders::new().add(("X-Content-Type-Options", "nosniff")))
-            .app_data(state.clone())
-            .configure(routes::init)
-    })
-    .workers(num_cpus::get())
-    .bind("0.0.0.0:8080")?
-    .run()
+    info!("Web Server running on {}", listener.local_addr().unwrap());
+    info!("Chat Server running on {}", listener.local_addr().unwrap());
+
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
     .await
+    .unwrap();
 }
