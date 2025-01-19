@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <div>
+            <input type="text" id="name" placeholder="Your name" />
+            <input type="text" id="message" placeholder="Message" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+        <div id="chat"></div>
+
+        <script>
+            let ws;
+
+            function connect() {
+                ws = new WebSocket("ws://localhost:8080/ws");
+
+                ws.onopen = () => {
+                    console.log("Connected to the WebSocket server");
+                };
+
+                ws.onmessage = (event) => {
+                    const messages = JSON.parse(event.data);
+                    const chatDiv = document.getElementById("chat");
+                    messages.forEach((msg) => {
+                        chatDiv.innerHTML =
+                            `<p><b>${msg.name}</b>: ${msg.message}</p>` +
+                            chatDiv.innerHTML;
+                    });
+                };
+
+                ws.onclose = (event) => {
+                    console.log(
+                        "WebSocket connection closed. Attempting to reconnect.."
+                    );
+
+                    setTimeout(() => {
+                        connect();
+                    }, 3000);
+                };
+            }
+
+            function sendMessage() {
+                const name = document.getElementById("name").value;
+                const message = document.getElementById("message").value;
+                if (!name || !message) return;
+
+                const msg = [
+                    {
+                        name: name,
+                        message: message,
+                        time: new Date().toISOString(),
+                    },
+                ];
+                ws.send(JSON.stringify(msg));
+                document.getElementById("message").value = "";
+            }
+
+            // Initial connection
+            connect();
+        </script>
+    </body>
+</html>
