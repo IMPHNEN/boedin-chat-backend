@@ -1,7 +1,3 @@
-use actix_web::web;
+mod chat;
 
-mod ws;
-
-pub fn init(cfg: &mut web::ServiceConfig) {
-    cfg.route("/ws", web::get().to(ws::chat));
-}
+pub use chat::chat_ws;

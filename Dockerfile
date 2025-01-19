@@ -1,20 +1,18 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1.83.0-alpine3.21 AS chef
+FROM rust:slim-bookworm AS builder
 WORKDIR /app
-RUN apk update && apk add --no-cache lld clang
 
-FROM chef AS planner
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+RUN --mount=type=bind,source=src,target=src \
+    --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
+    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
+    --mount=type=cache,target=/app/target/ \
+    --mount=type=cache,target=/usr/local/cargo/git/db \
+    --mount=type=cache,target=/usr/local/cargo/registry/ \
+    cargo build --locked --release && \
+    cp ./target/release/imphnen-chat-backend /tmp/imphnen-chat-backend
 
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
-COPY . .
-RUN cargo build --release
-
-FROM rust:slim-bookworm
 FROM debian:bookworm-slim
 WORKDIR /app
-COPY --from=builder /app/target/release/imphnen-chat-backend ./imphnen-chat-backend
+
+COPY --from=builder /tmp/imphnen-chat-backend ./imphnen-chat-backend
 
 CMD ["./imphnen-chat-backend"]
