@@ -40,18 +40,19 @@
             }
 
             function sendMessage() {
-                const name = document.getElementById("name").value;
-                const message = document.getElementById("message").value;
+                const name = document.getElementById("name").value.trim();
+                const message = document.getElementById("message").value.trim();
                 if (!name || !message) return;
 
-                const msg = [
-                    {
-                        name: name,
-                        message: message,
-                        time: new Date().toISOString(),
-                    },
-                ];
-                ws.send(JSON.stringify(msg));
+                ws.send(
+                    JSON.stringify([
+                        {
+                            name: name,
+                            message: message,
+                            time: new Date().toISOString(),
+                        },
+                    ])
+                );
                 document.getElementById("message").value = "";
             }
 
