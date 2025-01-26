@@ -5,11 +5,20 @@ edition = "2021"
 publish = false
 
 [dependencies]
-axum = { version = "0.8", features = ["ws"] }
-chrono = { version = "0.4", features = ["serde"] }
-futures = "0.3"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1", features = ["full"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
+axum = { version = "0.8.1", features = ["ws"] }
+chrono = { version = "0.4.39", features = ["serde"] }
+dotenv = "0.15.0"
+futures-util = "0.3.31"
+gradio = "0.3.2"
+include_dir = "0.7.4"
+jsonwebtoken = "9.3.0"
+lazy_static = "1.5.0"
+oauth2 = "5.0.0"
+reqwest = { version = "0.12.12", features = ["json"] }
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.137"
+sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite", "tls-rustls"] }
+tempfile = "3.15.0"
+tokio = { version = "1.43.0", features = ["full"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
