@@ -52,7 +52,7 @@ pub fn prepare_env_file(path: PathBuf) -> std::io::Result<()> {
         ("DISCORD_CLIENT_SECRET", "Dq6cUpwWswZ-HMigZZW3cKRozTvf7aMb"),
         (
             "DISCORD_REDIRECT_URL",
-            "/api/auth/authorized",
+            "https://budin.azumidev.web.id/api/auth/authorized",
         ),
     ];
 
