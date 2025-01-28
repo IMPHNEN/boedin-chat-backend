@@ -101,8 +101,8 @@ pub async fn discord_callback(
         .await
         .map_err(|e| format!("Failed to parse guilds member data: {}", e))?;
 
-    let admin_id = "1206224912360939520";
-    let moderator_id = "1206224912360939520";
+    let admin_id = "1313766951016730664";
+    let moderator_id = "1313766951016730664";
 
     let roles = guilds["roles"]
         .as_array()
@@ -130,8 +130,8 @@ pub async fn discord_callback(
         .timestamp() as usize;
 
     let claims = Claims {
-        sub: user["id"].as_str().unwrap_or_default().to_string(),
-        username: user["username"].as_str().unwrap_or_default().to_string(),
+        sub: user_id,
+        username: username,
         role: role.to_string(),
         exp: expiration_time,
     };
