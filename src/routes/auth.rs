@@ -140,5 +140,5 @@ pub async fn discord_callback(
     let jwt = encode(&Header::new(Algorithm::HS256), &claims, &jwt_secret)
         .map_err(|e| format!("Failed to generate JWT: {}", e))?;
 
-    Ok(Redirect::to(&format!("{}/?token={}", *FRONTEND_URL, jwt)))
+    Ok(Redirect::to(&format!("{}/authorized?token={}", *FRONTEND_URL, jwt)))
 }
